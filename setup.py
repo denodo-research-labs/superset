@@ -145,6 +145,7 @@ setup(
         ],
         "db2": ["ibm-db-sa>=0.3.5, <0.4"],
         "dremio": ["sqlalchemy-dremio>=1.1.5, <1.3"],
+        "denodo": ["denodo-sqlalchemy>=20220921"],
         "drill": ["sqlalchemy-drill==0.1.dev"],
         "druid": ["pydruid>=0.6.5,<0.7"],
         "dynamodb": ["pydynamodb>=0.4.2"],
