@@ -123,8 +123,6 @@ RUN apt-get update -y \
           libxtst6 \
           wget
 
-RUN pip install denodo-sqlalchemy
-
 # Install GeckoDriver WebDriver
 RUN wget https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz -O /tmp/geckodriver.tar.gz && \
     tar xvfz /tmp/geckodriver.tar.gz -C /tmp && \
@@ -137,9 +135,11 @@ RUN wget https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREF
     ln -s /opt/firefox/firefox /usr/local/bin/firefox
 
 # Cache everything for dev purposes...
+RUN python -m pip install --upgrade pip
 RUN cd /app \
     && pip install --no-cache -r requirements/docker.txt \
-    && pip install --no-cache -r requirements/requirements-local.txt || true
+    && pip install --no-cache -r requirements/local.txt || true
+
 USER superset
 
 
