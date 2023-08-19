@@ -19,13 +19,19 @@ from typing import Any, Dict, Optional
 
 from sqlalchemy.engine.url import URL
 from superset.databases.utils import make_url_safe
-from superset.db_engine_specs.base import BaseEngineSpec
+from superset.db_engine_specs.base import BaseEngineSpec, BasicParametersMixin
 
 
-class DenodoEngineSpec(BaseEngineSpec):
+class DenodoEngineSpec(BaseEngineSpec, BasicParametersMixin):
 
     engine = "denodo"
-    engine_name = "denodo"
+    engine_name = "Denodo"
+
+    default_driver = "psycopg2"
+    sqlalchemy_uri_placeholder = (
+        "denodo://user:password@host:port/dbname[?key=value&key=value...]"
+    )
+    encryption_parameters = {"sslmode": "require"}
 
     _time_grain_expressions = {
         None: "{col}",
