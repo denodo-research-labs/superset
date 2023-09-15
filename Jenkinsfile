@@ -1,3 +1,6 @@
+import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
+
 String getCurrentDate() {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern('yyyyMMdd')
     LocalDateTime now = LocalDateTime.now()
