@@ -11,8 +11,8 @@ pipeline {
         booleanParam(
             name: 'MAKE_PRINCIPAL',
             defaultValue: true,
-            description: 'If this is checked, this will be the image to use by default
-            (That that you download by default without tag)'
+            description: '''If this is checked, this will be the image to use by default
+            (That that you download by default without tag)'''
         )
         booleanParam(
             name: 'DRY_RUN',
