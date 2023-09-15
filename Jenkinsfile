@@ -39,10 +39,10 @@ pipeline {
             steps {
                 script {
                     def dockerbuild = "docker build "
-                    dockerbuild = dockerbuild + "--build-arg PY_VER=${params.PYTHON_VERSION_IMAGE}"
-                    dockerbuild = dockerbuild + "--build-arg GECKODRIVER_VERSION=${params.GECKODRIVER_VERSION}"
-                    dockerbuild = dockerbuild + "--build-arg FIREFOX_VERSION=${params.FIREFOX_VERSION}"
-                    dockerbuild = dockerbuild + "--build-arg NPM_BUILD_CMD=${params.NPM_BUILD_CMD}"
+                    dockerbuild = dockerbuild + "--build-arg PY_VER=${params.PYTHON_VERSION_IMAGE} "
+                    dockerbuild = dockerbuild + "--build-arg GECKODRIVER_VERSION=${params.GECKODRIVER_VERSION} "
+                    dockerbuild = dockerbuild + "--build-arg FIREFOX_VERSION=${params.FIREFOX_VERSION} "
+                    dockerbuild = dockerbuild + "--build-arg NPM_BUILD_CMD=${params.NPM_BUILD_CMD} "
                     dockerbuild = dockerbuild + "-t denodosuperset:${params.DENODO_VERSION}.${date} ."
                     sh dockerbuild
                 }
