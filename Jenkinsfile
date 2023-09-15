@@ -6,6 +6,8 @@ String getCurrentDate(){
     return sdf.format(date)
 }
 
+String date = getCurrentDate()
+
 pipeline {
     agent any
 
