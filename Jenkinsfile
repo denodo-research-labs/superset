@@ -31,13 +31,20 @@ pipeline {
         string(name: 'GECKODRIVER_VERSION', description: 'Gecko driver version', defaultValue: 'v0.32.0')
         string(name: 'FIREFOX_VERSION', description: 'Firefox version', defaultValue: '106.0.3')
         string(name: 'NPM_BUILD_CMD', description: 'npm build command', defaultValue: 'build')
+        string(name: 'DENODO_VERSION', description: 'Denodo version to use', defaultValue: '8.0')
     }
 
     stages {
         stage('Build') {
             steps {
                 script {
-                    sh "docker build -t denodosuperset:${params.DENODO_VERSION}.${date} ."
+                    def dockerbuild = "docker build "
+                    dockerbuild = dockerbuild + "--build-arg PY_VER=${params.PYTHON_VERSION_IMAGE}"
+                    dockerbuild = dockerbuild + "--build-arg GECKODRIVER_VERSION=${params.GECKODRIVER_VERSION}"
+                    dockerbuild = dockerbuild + "--build-arg FIREFOX_VERSION=${params.FIREFOX_VERSION}"
+                    dockerbuild = dockerbuild + "--build-arg NPM_BUILD_CMD=${params.NPM_BUILD_CMD}"
+                    dockerbuild = dockerbuild + "-t denodosuperset:${params.DENODO_VERSION}.${date} ."
+                    sh dockerbuild
                 }
             }
         }
