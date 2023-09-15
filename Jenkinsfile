@@ -34,13 +34,6 @@ pipeline {
     }
 
     stages {
-        stage ('Configure') {
-            steps {
-                script {
-                    String date = getCurrentDate()
-                }
-            }
-        }
         stage('Build') {
             steps {
                 script {
