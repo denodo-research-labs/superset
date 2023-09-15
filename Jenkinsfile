@@ -1,10 +1,9 @@
-import java.time.format.DateTimeFormatter
-import java.time.LocalDateTime
+import java.text.SimpleDateFormat
 
-String getCurrentDate() {
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern('yyyyMMdd')
-    LocalDateTime now = LocalDateTime.now()
-    return dtf.format(now)
+String getCurrentDate(){
+    def date = new Date()
+    def sdf = new SimpleDateFormat("yyyyMMdd")
+    return sdf.format(date)
 }
 
 pipeline {
