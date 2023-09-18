@@ -43,7 +43,7 @@ pipeline {
                     dockerbuild = dockerbuild + "--build-arg GECKODRIVER_VERSION=${params.GECKODRIVER_VERSION} "
                     dockerbuild = dockerbuild + "--build-arg FIREFOX_VERSION=${params.FIREFOX_VERSION} "
                     dockerbuild = dockerbuild + "--build-arg NPM_BUILD_CMD=${params.NPM_BUILD_CMD} "
-                    dockerbuild = dockerbuild + "-t denodosuperset:${params.DENODO_VERSION}.${date} ."
+                    dockerbuild = dockerbuild + "-t superset-denodo:${params.DENODO_VERSION}.${date} ."
                     sh dockerbuild
                 }
             }
@@ -52,7 +52,7 @@ pipeline {
         stage('Naming'){
             steps {
                 script {
-                   sh "docker image tag denodosuperset:${params.DENODO_VERSION}.${date} ${params.REGISTRY}/denodosuperset:${params.DENODO_VERSION}.${date}"
+                   sh "docker image tag superset-denodo:${params.DENODO_VERSION}.${date} ${params.REGISTRY}/superset-denodo:${params.DENODO_VERSION}.${date}"
                 }
             }
         }
@@ -63,7 +63,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "docker push ${params.REGISTRY}/denodosuperset:${params.DENODO_VERSION}.${date}"
+                    sh "docker push ${params.REGISTRY}/superset-denodo:${params.DENODO_VERSION}.${date}"
                 }
             }
         }
@@ -72,8 +72,8 @@ pipeline {
     post {
         success {
             echo 'Cleaning images'
-            sh "docker rmi -f denodosuperset:${params.DENODO_VERSION}.${date}"
-            sh "docker rmi -f ${params.REGISTRY}/denodosuperset:${params.DENODO_VERSION}.${date}"
+            sh "docker rmi -f superset-denodo:${params.DENODO_VERSION}.${date}"
+            sh "docker rmi -f ${params.REGISTRY}/superset-denodo:${params.DENODO_VERSION}.${date}"
             sh "docker builder prune -f"
         }
 
