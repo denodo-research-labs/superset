@@ -7,6 +7,7 @@ String getCurrentDate(){
 }
 
 String date = getCurrentDate()
+String packageJSONVersion ""
 
 pipeline {
     agent any
@@ -38,12 +39,14 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    def packageJSON = readJSON file: 'superset-frontend/package.json'
+                    packageJSONVersion = packageJSON.version
                     def dockerbuild = "docker build "
                     dockerbuild = dockerbuild + "--build-arg PY_VER=${params.PYTHON_VERSION_IMAGE} "
                     dockerbuild = dockerbuild + "--build-arg GECKODRIVER_VERSION=${params.GECKODRIVER_VERSION} "
                     dockerbuild = dockerbuild + "--build-arg FIREFOX_VERSION=${params.FIREFOX_VERSION} "
                     dockerbuild = dockerbuild + "--build-arg NPM_BUILD_CMD=${params.NPM_BUILD_CMD} "
-                    dockerbuild = dockerbuild + "-t superset-denodo:${params.DENODO_VERSION}.${date} ."
+                    dockerbuild = dockerbuild + "-t superset-denodo:${packageJSONVersion} ."
                     sh dockerbuild
                 }
             }
@@ -52,7 +55,7 @@ pipeline {
         stage('Naming'){
             steps {
                 script {
-                   sh "docker image tag superset-denodo:${params.DENODO_VERSION}.${date} ${params.REGISTRY}/superset-denodo:${params.DENODO_VERSION}.${date}"
+                   sh "docker image tag superset-denodo:${packageJSONVersion} ${params.REGISTRY}/superset-denodo:${packageJSONVersion}"
                 }
             }
         }
@@ -63,7 +66,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "docker push ${params.REGISTRY}/superset-denodo:${params.DENODO_VERSION}.${date}"
+                    sh "docker push ${params.REGISTRY}/superset-denodo:${packageJSONVersion}"
                 }
             }
         }
@@ -72,8 +75,8 @@ pipeline {
     post {
         success {
             echo 'Cleaning images'
-            sh "docker rmi -f superset-denodo:${params.DENODO_VERSION}.${date}"
-            sh "docker rmi -f ${params.REGISTRY}/superset-denodo:${params.DENODO_VERSION}.${date}"
+            sh "docker rmi -f superset-denodo:${packageJSONVersion}"
+            sh "docker rmi -f ${params.REGISTRY}/superset-denodo:${packageJSONVersion}"
             sh "docker builder prune -f"
         }
 
