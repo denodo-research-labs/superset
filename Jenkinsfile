@@ -32,7 +32,6 @@ pipeline {
         string(name: 'GECKODRIVER_VERSION', description: 'Gecko driver version', defaultValue: 'v0.32.0')
         string(name: 'FIREFOX_VERSION', description: 'Firefox version', defaultValue: '106.0.3')
         string(name: 'NPM_BUILD_CMD', description: 'npm build command', defaultValue: 'build')
-        string(name: 'DENODO_VERSION', description: 'Denodo version to use', defaultValue: '8.0')
     }
 
     stages {
