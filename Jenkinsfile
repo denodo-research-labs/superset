@@ -7,7 +7,7 @@ String getCurrentDate(){
 }
 
 String date = getCurrentDate()
-String packageJSONVersion ""
+String packageJSONVersion = ""
 
 pipeline {
     agent any
