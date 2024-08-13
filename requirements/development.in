@@ -18,6 +18,7 @@
 #
 -r base.in
 -e .[cors,druid,hive,mysql,postgres,thumbnails]
+denodo-sqlalchemy
 ipython
 progress>=1.5,<2
 pyinstrument>=4.0.2,<5

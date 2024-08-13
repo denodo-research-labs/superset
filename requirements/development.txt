@@ -30,6 +30,8 @@ chardet==5.1.0
     # via tabulator
 decorator==5.1.1
     # via ipython
+denodo-sqlalchemy==1.0.6
+    # via -r requirements/development.in
 dill==0.3.6
     # via pylint
 et-xmlfile==1.1.0
