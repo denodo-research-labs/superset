@@ -15,10 +15,18 @@
 # limitations under the License.
 #
 
+#> [denodo-added]
+ARG UBI_IMAGE_NAME=ubi9/python-39
+ARG UBI_IMAGE_VERSION=1-192.1722518946
+#> ----
+
 ######################################################################
 # Node stage to deal with static asset construction
 ######################################################################
-ARG PY_VER=3.9-slim-bookworm
+
+#> [denodo-removed]
+# ARG PY_VER=3.9-slim-bookworm
+#> ----
 
 # if BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
@@ -50,7 +58,14 @@ RUN npm run ${BUILD_CMD}
 ######################################################################
 # Final lean image...
 ######################################################################
-FROM python:${PY_VER} AS lean
+
+#> [denodo-removed]
+# FROM python:${PY_VER} AS lean
+#> ----
+
+#> [denodo-added]
+FROM registry.access.redhat.com/${UBI_IMAGE_NAME}:${UBI_IMAGE_VERSION} AS lean
+#> ----
 
 WORKDIR /app
 ENV LANG=C.UTF-8 \
@@ -61,24 +76,54 @@ ENV LANG=C.UTF-8 \
     SUPERSET_HOME="/app/superset_home" \
     SUPERSET_PORT=8088
 
+#> [denodo-added]
+USER root
+#> ----
+
+#> [denodo-removed]
+# RUN mkdir -p ${PYTHONPATH} superset/static superset-frontend apache_superset.egg-info requirements \
+#     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
+#     && apt-get update -qq && apt-get install -yqq --no-install-recommends \
+#         build-essential \
+#         curl \
+#         default-libmysqlclient-dev \
+#         libsasl2-dev \
+#         libsasl2-modules-gssapi-mit \
+#         libpq-dev \
+#         libecpg-dev \
+#         libldap2-dev \
+#     && touch superset/static/version_info.json \
+#     && chown -R superset:superset ./* \
+#     && rm -rf /var/lib/apt/lists/*
+#> ----
+
+#> [denodo-added]
 RUN mkdir -p ${PYTHONPATH} superset/static superset-frontend apache_superset.egg-info requirements \
-    && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
-    && apt-get update -qq && apt-get install -yqq --no-install-recommends \
-        build-essential \
-        curl \
-        default-libmysqlclient-dev \
-        libsasl2-dev \
-        libsasl2-modules-gssapi-mit \
-        libpq-dev \
-        libecpg-dev \
-        libldap2-dev \
-    && touch superset/static/version_info.json \
-    && chown -R superset:superset ./* \
-    && rm -rf /var/lib/apt/lists/*
+    && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset
+# dnf check-update returns 100 if there are new packages, but Dockerfiles expect 0
+RUN dnf check-update -q || { rc=$?; [ "$rc" -eq 100 ] && exit 0; exit "$rc"; }
+RUN dnf upgrade -yq  \
+    && dnf remove -yq \
+           subscription-manager \
+           nodejs \
+           httpd httpd-devel httpd-tools httpd-filesystem \
+    && dnf install -yq \
+           cyrus-sasl-gssapi \
+           openldap-devel
+RUN touch superset/static/version_info.json \
+    && chown -R superset:superset ./*
+#> ----
 
 COPY --chown=superset:superset setup.py MANIFEST.in README.md ./
 # setup.py uses the version information in package.json
 COPY --chown=superset:superset superset-frontend/package.json superset-frontend/
+
+#> [denodo-added]
+# Make sure we have the latest version of pip and setuptools
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m pip install --upgrade pip setuptools
+#> ----
+
 RUN --mount=type=bind,target=./requirements/local.txt,src=./requirements/local.txt \
     --mount=type=bind,target=./requirements/development.txt,src=./requirements/development.txt \
     --mount=type=bind,target=./requirements/base.txt,src=./requirements/base.txt \
@@ -94,6 +139,16 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && chown -R superset:superset superset/translations
 
 COPY --chmod=755 ./docker/run-server.sh /usr/bin/
+
+#> [denodo-added]
+# kernel-headers is removed at this point because this removes gcc too, which may have been
+# needed for installing python dependencies from source
+RUN dnf remove -yq kernel-headers \
+                   git \
+                   less \
+    && rm -rf /var/lib/dnf/history*
+#> ----
+
 USER superset
 
 HEALTHCHECK CMD curl -f "http://localhost:${SUPERSET_PORT}/health"
@@ -106,8 +161,8 @@ CMD ["/usr/bin/run-server.sh"]
 # Dev image...
 ######################################################################
 FROM lean AS dev
-ARG GECKODRIVER_VERSION=v0.33.0 \
-    FIREFOX_VERSION=117.0.1
+ARG GECKODRIVER_VERSION=v0.33.0
+ARG FIREFOX_VERSION=117.0.1
 
 USER root
 
