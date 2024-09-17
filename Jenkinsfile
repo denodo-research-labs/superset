@@ -41,9 +41,7 @@ pipeline {
                 script {
                     def packageJSON = readJSON file: 'superset-frontend/package.json'
                     packageJSONVersion = packageJSON.version.replaceAll('\\+','_')
-                    def dockerbuild = "docker build "
-                    dockerbuild = dockerbuild + "--build-arg UBI_IMAGE_VERSION=${params.UBI_IMAGE_VERSION} "
-                    dockerbuild = dockerbuild + "--build-arg NPM_BUILD_CMD=${params.NPM_BUILD_CMD} "
+                    def dockerbuild = "docker build --no-cache "
                     dockerbuild = dockerbuild + "-t superset-denodo:${packageJSONVersion} "
                     dockerbuild = dockerbuild + "--target ci ."
                     sh dockerbuild
