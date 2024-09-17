@@ -32,7 +32,7 @@ pipeline {
             name: 'REGISTRY',
             description: 'Docker registry where the image will be uploaded to',
             defaultValue: 'gcr.io/denodo-proddev-container/denodolabs')
-        string(name: 'UBI_IMAGE_VERSION', description: 'Version of the base UBI image to be used', defaultValue: '1-182')
+        string(name: 'UBI_IMAGE_VERSION', description: 'Version of the base UBI image to be used')
         string(name: 'NPM_BUILD_CMD', description: 'npm build command', defaultValue: 'build')
         string(name: 'EMAIL_TO', description: 'Who to send the notification email to', defaultValue: 'htorres@denodo.com, dfernandez@denodo.com, mrodriguezr@denodo.com, mpicos@denodo.com')
     }
