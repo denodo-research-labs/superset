@@ -17,7 +17,7 @@
 
 #> [denodo-added]
 ARG UBI_IMAGE_NAME=ubi9/python-39
-ARG UBI_IMAGE_VERSION=1-192.1722518946
+ARG UBI_IMAGE_VERSION=1-197.1725851336
 #> ----
 
 ######################################################################
