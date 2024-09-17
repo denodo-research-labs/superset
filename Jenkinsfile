@@ -126,7 +126,7 @@ pipeline {
             echo 'Removing images'
             sh "if ! [ \"\$(docker images -q node:16-slim 2> /dev/null)\" = \"\" ] ; then docker rmi -f node:16-slim; else echo \"Image node:16-slim does not exist\"; fi"
             sh "if ! [ \"\$(docker images -q aquasec/trivy 2> /dev/null)\" = \"\" ] ; then docker rmi -f aquasec/trivy; else echo \"Image aquasec/trivy does not exist\"; fi"
-            sh "if ! [ \"\$(docker images -q registry.access.redhat.com/ubi9/python-39:${params.UBI_IMAGE_VERSION} 2> /dev/null)\" = \"\" ] ; then docker rmi -f python:${params.PYTHON_VERSION_IMAGE}; else echo \"Image registry.access.redhat.com/ubi9/python-39:${params.UBI_IMAGE_VERSION} does not exist\"; fi"
+            sh "if ! [ \"\$(docker images -q registry.access.redhat.com/ubi9/python-39:* 2> /dev/null)\" = \"\" ] ; then for v in $(docker images -q registry.access.redhat.com/ubi9/python-39:*); do docker rmi -f \$a; done; else echo \"Image registry.access.redhat.com/ubi9/python-39 does not exist\"; fi"
             sh "if ! [ \"\$(docker images -f dangling=true -q 2> /dev/null)\" = \"\" ]; then docker rmi -f \$(docker images -f dangling=true -q); else echo \"No dangling images\"; fi"
             echo 'Removing cache'
             sh "docker builder prune -af"
