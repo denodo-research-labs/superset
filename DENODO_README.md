@@ -277,7 +277,7 @@ So for example:
 ```sh
 docker push harbor.open.denodo.com/denodo-connects-8.0/images/superset-denodo:4.0.2_denodo-20240801
 
-docker push harbor.open.denodo.com/denodo-connects-8.0/:latest
+docker push harbor.open.denodo.com/denodo-connects-8.0/images/superset-denodo:latest
 
 docker push harbor.open.denodo.com/denodo-connects-9/images/superset-denodo:4.0.2_denodo-20240801
 
@@ -296,10 +296,10 @@ Once the Cosign infrastructure has been correctly installed, images can be signe
 PowerShell, from the folder where the `cosign_denodo.key` file has been created:
 
 ```sh
-cosign sign --key cosign_denodo.key harbor.open.denodo.com/denodo-connects-${denodo_version}/images/superset-denodo@sha256:${shasum}
+cosign sign --key cosign_denodo.key harbor.open.denodo.com/denodo-connects-${denodo_version}/images/superset-denodo@sha256:${sha_sum}
 ```
 
-The value for `${shasum}` above can be obtained from the Harbor interface itself, where images will appear referenced
+The value for `${sha_sum}` above can be obtained from the Harbor interface itself, where images will appear referenced
 like `sha245:xxxx`. But note that that SHA sum is in _reduced_ format, and cosign will need the entire value. This
 entire value can be obtained by clicking on the details of the image on the Harbor interface and copying it from
 the URL.
@@ -317,3 +317,39 @@ cosign sign --key cosign_denodo.key harbor.open.denodo.com/denodo-connects-9/ima
 ```
 
 Once signed, images should appear as such at the Harbor user interface, and this will conclude the process.
+
+
+## Exporting images for their inclusion in the Denodo Dashboard artifacts
+
+Due to network restrictions, some customers require images to be included in the Denodo Dashboard artifacts downloadable
+from the Support Site (they cannot download from Denodo Harbor). We will distribute these images in `.tar.gz` format.
+
+In order to facilitate this, we need to save the images from our local repository using `docker save`:
+
+```sh
+docker save harbor.open.denodo.com/denodo-connects-${denodo_version}/images/superset-denodo:${version} -o superset-denodo-${denodo_version}-image-${version}.tar
+```
+
+And then gzip it to get the `.tar.gz` final file:
+
+```sh
+gzip superset-denodo-${denodo_version}-image-${version}.tar
+```
+
+Note that, if the GZip tool is not installed in Windows, it can be used from a WSL2 distribution, as Linux typically
+include this tool.
+
+For example:
+
+```sh
+docker save harbor.open.denodo.com/denodo-connects-8.0/images/superset-denodo:4.0.2_denodo-20240801 -o superset-denodo-8.0-image-4.0.2_denodo-20240801.tar
+gzip superset-denodo-8.0-image-4.0.2_denodo-20240801.tar
+
+docker save harbor.open.denodo.com/denodo-connects-9/images/superset-denodo:4.0.2_denodo-20240801 -o superset-denodo-9-image-4.0.2_denodo-20240801.tar
+gzip superset-denodo-9-image-4.0.2_denodo-20240801.tar
+```
+
+Images will now be ready to be included in the DenodoConnect artifacts, and when loaded will create the same tags
+in the host docker system as if they were downloaded from Harbor.
+
+
