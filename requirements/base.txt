@@ -83,6 +83,8 @@ cryptography==42.0.7
     #   apache-superset
     #   paramiko
     #   pyopenssl
+denodo-sqlalchemy==1.0.6
+    # via denodo
 deprecated==1.2.14
     # via limits
 deprecation==2.1.0
