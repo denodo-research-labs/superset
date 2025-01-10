@@ -15,10 +15,18 @@
 # limitations under the License.
 #
 
+#> [denodo-added]
+ARG UBI_IMAGE_NAME=ubi9/python-311
+ARG UBI_IMAGE_VERSION=1-72.1722518949
+#> ----
+
 ######################################################################
 # Node stage to deal with static asset construction
 ######################################################################
-ARG PY_VER=3.10-slim-bookworm
+
+#> [denodo-removed]
+# ARG PY_VER=3.10-slim-bookworm
+#> ----
 
 # if BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
@@ -60,7 +68,14 @@ RUN rm /app/superset/translations/messages.pot
 ######################################################################
 # Final lean image...
 ######################################################################
-FROM python:${PY_VER} AS lean
+
+#> [denodo-removed]
+# FROM python:${PY_VER} AS lean
+#> ----
+
+#> [denodo-added]
+FROM registry.access.redhat.com/${UBI_IMAGE_NAME}:${UBI_IMAGE_VERSION} AS lean
+#> ----
 
 WORKDIR /app
 ENV LANG=C.UTF-8 \
@@ -71,31 +86,62 @@ ENV LANG=C.UTF-8 \
     SUPERSET_HOME="/app/superset_home" \
     SUPERSET_PORT=8088
 
+#> [denodo-added]
+USER root
+#> ----
+
+#> [denodo-removed]
+# RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info requirements \
+#     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
+#     && apt-get update -qq && apt-get install -yqq --no-install-recommends \
+#         curl \
+#         default-libmysqlclient-dev \
+#         libsasl2-dev \
+#         libsasl2-modules-gssapi-mit \
+#         libpq-dev \
+#         libecpg-dev \
+#         libldap2-dev \
+#     && touch superset/static/version_info.json \
+#     && chown -R superset:superset ./* \
+#     && rm -rf /var/lib/apt/lists/*
+#> ----
+
+#> [denodo-added]
 RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info requirements \
-    && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
-    && apt-get update -qq && apt-get install -yqq --no-install-recommends \
-        curl \
-        default-libmysqlclient-dev \
-        libsasl2-dev \
-        libsasl2-modules-gssapi-mit \
-        libpq-dev \
-        libecpg-dev \
-        libldap2-dev \
-    && touch superset/static/version_info.json \
-    && chown -R superset:superset ./* \
-    && rm -rf /var/lib/apt/lists/*
+    && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset
+# dnf check-update returns 100 if there are new packages, but Dockerfiles expect 0
+RUN dnf check-update -q || { rc=$?; [ "$rc" -eq 100 ] && exit 0; exit "$rc"; }
+RUN dnf upgrade -yq  \
+    && dnf remove -yq \
+           subscription-manager \
+           nodejs \
+           httpd httpd-devel httpd-tools httpd-filesystem \
+    && dnf install -yq \
+           cyrus-sasl-gssapi \
+           openldap-devel
+RUN touch superset/static/version_info.json \
+    && chown -R superset:superset ./*
+#> ----
 
 COPY --chown=superset:superset pyproject.toml setup.py MANIFEST.in README.md ./
 # setup.py uses the version information in package.json
 COPY --chown=superset:superset superset-frontend/package.json superset-frontend/
 COPY --chown=superset:superset requirements/base.txt requirements/
+#> [denodo-removed]
+# RUN --mount=type=cache,target=/root/.cache/pip \
+#     apt-get update -qq && apt-get install -yqq --no-install-recommends \
+#       build-essential \
+#     && pip install --upgrade setuptools pip \
+#     && pip install -r requirements/base.txt \
+#     && apt-get autoremove -yqq --purge build-essential \
+#     && rm -rf /var/lib/apt/lists/*
+#> ----
+
+#> [denodo-added]
 RUN --mount=type=cache,target=/root/.cache/pip \
-    apt-get update -qq && apt-get install -yqq --no-install-recommends \
-      build-essential \
-    && pip install --upgrade setuptools pip \
-    && pip install -r requirements/base.txt \
-    && apt-get autoremove -yqq --purge build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    pip install --upgrade setuptools pip \
+    && pip install -r requirements/base.txt
+#> ----
 
 # Copy the compiled frontend assets
 COPY --chown=superset:superset --from=superset-node /app/superset/static/assets superset/static/assets
@@ -116,6 +162,16 @@ RUN ./scripts/translations/generate_mo_files.sh \
     && rm superset/translations/*/LC_MESSAGES/*.po
 
 COPY --chmod=755 ./docker/run-server.sh /usr/bin/
+
+#> [denodo-added]
+# kernel-headers is removed at this point because this removes gcc too, which may have been
+# needed for installing python dependencies from source
+RUN dnf remove -yq kernel-headers \
+                   git \
+                   less \
+    && rm -rf /var/lib/dnf/history*
+#> ----
+
 USER superset
 
 HEALTHCHECK CMD curl -f "http://localhost:${SUPERSET_PORT}/health"
