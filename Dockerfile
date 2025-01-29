@@ -17,7 +17,7 @@
 
 #> [denodo-added]
 ARG UBI_IMAGE_NAME=ubi9/python-311
-ARG UBI_IMAGE_VERSION=1-72.1722518949
+ARG UBI_IMAGE_VERSION=1-1736353526
 #> ----
 
 ######################################################################
@@ -116,6 +116,7 @@ RUN dnf upgrade -yq  \
            subscription-manager \
            nodejs \
            httpd httpd-devel httpd-tools httpd-filesystem \
+           rsync \
     && dnf install -yq \
            cyrus-sasl-gssapi \
            openldap-devel
