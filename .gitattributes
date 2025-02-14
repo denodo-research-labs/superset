@@ -1,2 +1,6 @@
 docker/**/*.sh text eol=lf
 *.svg binary
+**/*.js text eol=lf
+**/*.jsx text eol=lf
+**/*.ts text eol=lf
+**/*.tsx text eol=lf
