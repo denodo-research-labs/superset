@@ -24,6 +24,23 @@ WSL2 distributions used for running the Docker daemon, and it will be possible t
 i.e. the "docker" command from both Windows Power Shell and a shell in a WSL2 disitribution (e.g. Ubuntu), though
 using it from WSL2 is only recommended for _building_ the Superset images, not for running them, as explained below.
 
+### Line Feeds
+
+Some files in the Superset code repository (specifically frontend files: `.js`, `.jsx`, `.ts` and `.tsx`) are required
+by linting steps to use UNIX EOLs, which can cause issues at build time when the repository is cloned from Windows
+using the auto-crlf function. Denodo's version of this repository includes rules in `.gitattributes` that are
+specifically meant to keep these files with UNIX line endings, but in cases of further trouble, the repository
+can be cloned from WSL2 into the Windows filesystem space (`/mnt/c/Users/<user>`) so that the auto-crlf function is not
+applied, and then built from Windows as usual.
+
+### Building times
+
+For unclear reasons, it has been experienced that build times can get extremely high due to some kind of network
+timeout issues during the build of the node-based intermediate image. Sometimes this provokes timeouts, and some
+other times it simply makes build take more than an hour long.
+
+In such cases, a system reboot is recommended (of the Windows host), and build times should go back to normal.
+
 
 ## Building the image
 
